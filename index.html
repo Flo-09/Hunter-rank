@@ -1679,14 +1679,18 @@ input::placeholder,textarea::placeholder{color:rgba(41,121,255,.28)!important}
 
 /* Milestones */
 .bpbar-milestones{
-  display:flex;justify-content:space-between;
-  margin-top:8px;padding:0;position:relative;
+  position:relative;
+  margin-top:8px;
+  height:18px;
 }
 .bpbar-ms{
+  position:absolute;top:0;
+  transform:translateX(-50%);
   display:flex;flex-direction:column;align-items:center;gap:3px;
   font-family:'Orbitron',monospace;font-size:6px;letter-spacing:1px;
   animation:bMsIn .4s ease-out both;
 }
+.bpbar-ms[data-edge="end"]{transform:translateX(-100%)}
 .bpbar-ms-dot{
   width:4px;height:4px;border-radius:50%;
   transition:background .5s,box-shadow .5s;
@@ -3698,7 +3702,7 @@ function renderBadgesHero(){
       </div>
       <!-- Milestones avec point -->
       <div class="bpbar-milestones">
-        ${milestones.map((m,i)=>`<span class="bpbar-ms ${pct>=m?'reached':'unreached'}" style="animation-delay:${i*.06+.3}s">
+        ${milestones.map((m,i)=>`<span class="bpbar-ms ${pct>=m?'reached':'unreached'}" data-edge="${m===100?'end':'mid'}" style="left:${m}%;animation-delay:${i*.06+.3}s">
           <div class="bpbar-ms-dot"></div>
           <span class="bpbar-ms-txt">${m}%</span>
         </span>`).join('')}
