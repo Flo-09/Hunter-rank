@@ -20,11 +20,11 @@
   --r:16px;--r2:20px;--r3:26px;
   --sb:env(safe-area-inset-bottom,0px);--st:env(safe-area-inset-top,0px);
   /* Courbes d'animation premium */
-  --spring:cubic-bezier(.16,1,.3,1);
-  --bounce:cubic-bezier(.34,1.56,.64,1);
-  --out:cubic-bezier(.2,0,0,1);
-  --snappy:cubic-bezier(.4,0,.2,1);
-  --elastic:cubic-bezier(.68,-0.55,.265,1.55);
+  --spring:cubic-bezier(.22,1,.36,1);
+  --bounce:cubic-bezier(.22,.92,.32,1.08);
+  --out:cubic-bezier(.22,0,0,1);
+  --snappy:cubic-bezier(.3,0,.2,1);
+  --elastic:cubic-bezier(.26,1.15,.35,1);
   --nav-h:56px;--tab-h:calc(72px + var(--sb));
 }
 [data-t=red]   {--A:#e53935;--AL:#ff5252;--AG:rgba(229,57,53,.3)}
@@ -1599,7 +1599,7 @@ input::placeholder,textarea::placeholder{color:rgba(41,121,255,.28)!important}
 .bpbar-fill{
   height:100%;width:0%;border-radius:99px;
   position:relative;overflow:hidden;
-  transition:width 1.4s cubic-bezier(.16,1,.3,1);
+  transition:width 1.1s var(--spring);
   background:linear-gradient(90deg,
     #7c2d12 0%,
     #b45309 12%,
@@ -1654,9 +1654,9 @@ input::placeholder,textarea::placeholder{color:rgba(41,121,255,.28)!important}
     0 0 10px 3px rgba(251,191,36,.6),
     0 0 24px 6px rgba(251,191,36,.3),
     0 0 50px 12px rgba(251,191,36,.1);
-  transform:translateY(-50%);
+  transform:translate(-50%,-50%);
   pointer-events:none;z-index:10;
-  transition:left 1.4s cubic-bezier(.16,1,.3,1);
+  transition:left 1.1s var(--spring),opacity .25s ease;
   animation:bOrbPulse 2.2s ease-in-out infinite;
   will-change:left,transform;
 }
@@ -3703,12 +3703,10 @@ function renderBadgesHero(){
     const track=document.getElementById('bpbar-track');
     if(bar)bar.style.width=pct+'%';
     if(orb&&track){
-      const tw=track.offsetWidth||220;
-      // Orbe centré sur le bout de la barre, avec marge
-      const orbPx=Math.max(0, pct/100*tw - 9);
-      orb.style.left=orbPx+'px';
-      // Masquer l'orbe si 0%
-      orb.style.opacity=pct>0?'1':'0';
+      const clampedPct=Math.max(0,Math.min(100,pct));
+      // Aligner précisément l'orbe avec le même pourcentage que la barre
+      orb.style.left=clampedPct+'%';
+      orb.style.opacity=clampedPct>0?'1':'0';
     }
   }));
 }
@@ -5200,7 +5198,7 @@ const _origRenderAll=renderAll;
 function renderAllPatched(){
   _origRenderAll.call(this);
   // Délai pour laisser le DOM se mettre à jour
-  setTimeout(injectNegotiationButtons,120);
+  setTimeout(injectNegotiationButtons,80);
 }
 
 // Modal de négociation
@@ -5278,7 +5276,7 @@ function openNegotiation(habitId){
         <div style="flex:1">
           <p style="font-family:'Orbitron',monospace;font-size:8px;font-weight:700;letter-spacing:1.5px;color:var(--t2);margin-bottom:3px">JOUR DE REPOS MÉRITÉ</p>
           <p style="font-size:13px;color:var(--t1);font-weight:600">Pause sans pénalité</p>
-          <p style="font-size:11px;color:var(--t3);margin-top:1px">Série cassée mais 0 XP perdu · 1×/semaine</p>
+          <p style="font-size:11px;color:var(--t3);margin-top:1px">Série préservée · 0 XP · 1×/semaine</p>
         </div>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       </button>
@@ -5354,6 +5352,18 @@ window.acceptNegotiation=function(habitId,mode){
   } else if(mode==='rest'){
     if(!h.rest_days)h.rest_days='';
     const rds=h.rest_days.split(',').filter(Boolean);
+    const weekKey=d=>{
+      const x=new Date(d+'T00:00:00');
+      const day=(x.getDay()+6)%7;
+      x.setDate(x.getDate()-day);
+      return x.toISOString().slice(0,10);
+    };
+    const curWeek=weekKey(TODAY);
+    const alreadyUsedThisWeek=rds.some(d=>weekKey(d)===curWeek);
+    if(alreadyUsedThisWeek){
+      toast('Repos déjà utilisé cette semaine');
+      return;
+    }
     if(!rds.includes(TODAY)){rds.push(TODAY);h.rest_days=rds.join(',');}
     const ds=dates(h);
     if(!ds.includes(TODAY)){ds.push(TODAY);h.completed_dates=ds.join(',');}
@@ -5370,7 +5380,7 @@ window.acceptNegotiation=function(habitId,mode){
         }
       }
     },180);
-    toast('Repos mérité · Série maintenue 💙');
+    toast('Repos mérité · Série préservée 💙');
     setTimeout(()=>renderAll(),220);
   }
 };
@@ -5380,7 +5390,7 @@ window.acceptNegotiation=function(habitId,mode){
 const _raf_orig=window.renderAll||renderAll;
 window.renderAll=function(){
   _raf_orig.call(this);
-  setTimeout(injectNegotiationButtons,150);
+  setTimeout(injectNegotiationButtons,90);
 };
 
 // Appel initial au boot
