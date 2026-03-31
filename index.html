@@ -3044,7 +3044,7 @@ function toggleHabit(id){
     if(!h.resistance_log)h.resistance_log='';
     const tsArr=h.completed_timestamps.split(',').filter(Boolean);
     const rlArr=h.resistance_log.split(',').filter(Boolean);
-    tsArr.push(nowISO);rlArr.push(xpMult.toFixed(2));
+    tsArr.push(nowISO);rlArr.push(resistMult.toFixed(2));
     h.completed_timestamps=tsArr.join(',');h.resistance_log=rlArr.join(',');
     const wrap=document.querySelector('.hcw[data-id="'+id+'"]');
     if(wrap){
@@ -3372,7 +3372,7 @@ function completedTimer(h,modal){
   if(!hh.resistance_log)hh.resistance_log='';
   const tsArr=hh.completed_timestamps.split(',').filter(Boolean);
   const rlArr=hh.resistance_log.split(',').filter(Boolean);
-  tsArr.push(nowISO);rlArr.push(xpMult.toFixed(2));
+  tsArr.push(nowISO);rlArr.push(resistMult.toFixed(2));
   hh.completed_timestamps=tsArr.join(',');hh.resistance_log=rlArr.join(',');
   hh.completed_dates=ds.join(',');syncAll();
   if(navigator.vibrate)navigator.vibrate([50,30,50,30,180]);
