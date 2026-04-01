@@ -486,7 +486,7 @@ body::before{
 /* ══════════════════════════════════
    ORBs — plus vivants
 ══════════════════════════════════ */
-.orb{position:fixed;border-radius:50%;pointer-events:none;z-index:0;transform:translate3d(0,var(--py,0px),0)}
+.orb{position:fixed;border-radius:50%;pointer-events:none;z-index:0;transform:translate3d(var(--tx,0px),var(--ty,0px),0)}
 .orb1{
   width:700px;height:700px;top:-220px;left:-180px;
   background:radial-gradient(circle,rgba(41,121,255,.09),transparent 62%);
@@ -503,9 +503,6 @@ body::before{
   animation:orb 32s ease-in-out infinite 8s;
   pointer-events:none;
 }
-/* ══════════════════════════════════
-   XP BAR — Version Fluide Premium
-══════════════════════════════════ */
 /* ══════════════════════════════════
    XP BAR — Version Fluide Premium
 ══════════════════════════════════ */
@@ -554,13 +551,6 @@ body::before{
   inset: 0;
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
   animation: shimmer 3s infinite linear;
-}
-.xp-fill::after{
-  content:'';position:absolute;inset:0;
-  background:
-   linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent),
-   repeating-linear-gradient(100deg,rgba(255,255,255,.14) 0 2px,transparent 2px 10px);
-  width:100%;animation:shimmer 2.2s ease-in-out infinite,manaPulse 1.2s ease-in-out infinite;
 }
 
 /* ══════════════════════════════════
@@ -685,6 +675,7 @@ body::before{
   transition: width .35s var(--spring);
   animation: manaFlow 1.8s linear infinite;
 }
+.passive-chip {
   display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;
   border-radius:12px;padding:9px 10px;background:rgba(124,77,255,.08);border:1px solid rgba(124,77,255,.28);
 }
@@ -1149,6 +1140,12 @@ input::placeholder,textarea::placeholder{color:rgba(41,121,255,.28)!important}
   animation:ripple .55s ease-out forwards;pointer-events:none;z-index:10;
   transform:scale(0);
 }
+@keyframes hitImpact{
+  0%{transform:scale(1);filter:brightness(1)}
+  20%{transform:scale(1.012) rotate(.1deg);filter:brightness(1.4) contrast(1.2)}
+  100%{transform:scale(1);filter:brightness(1)}
+}
+.hit-impact{animation:hitImpact .18s var(--snappy);pointer-events:none}
 </style>
 </head>
 <body>
@@ -2454,7 +2451,10 @@ function initOrbParallax(){
       const y=area.scrollTop||0;
       document.querySelectorAll('.orb').forEach((o,i)=>{
         const speed=[0.18,0.32,0.48][i]||0.22;
-        o.style.setProperty('--py',`${Math.round(y*speed)}px`);
+        const ty=Math.round(y*speed);
+        const tx=Math.round((i%2===0?1:-1)*y*speed*.18);
+        o.style.setProperty('--ty',`${ty}px`);
+        o.style.setProperty('--tx',`${tx}px`);
       });
     });
   },{passive:true});
@@ -3185,6 +3185,7 @@ function toggleHabit(id){
     const baseXp=xpFinal(h,str);
     const xp=Math.round(baseXp*resistMult);
     applyXpGain(xp);
+    triggerHit();
     if(!h.completed_timestamps)h.completed_timestamps='';
     if(!h.resistance_log)h.resistance_log='';
     const tsArr=h.completed_timestamps.split(',').filter(Boolean);
@@ -5813,6 +5814,14 @@ setTimeout(injectNegotiationButtons,800);
   `;
   document.head.appendChild(s);
 })();
+
+function triggerHit(){
+  document.body.classList.add('hit-impact');
+  if(navigator.vibrate)navigator.vibrate(20);
+  setTimeout(()=>document.body.classList.remove('hit-impact'),180);
+}
+initImmersiveSensors();
+function initImmersiveSensors(){console.log("Système sensoriel : OK");}
 
 
 </script>
